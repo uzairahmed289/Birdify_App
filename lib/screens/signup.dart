@@ -1,17 +1,19 @@
-import 'package:birdify_flutter/screens/signup.dart';
+import 'package:birdify_flutter/screens/testdashboardscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:birdify_flutter/screens/testdashboardscreen.dart';
 
-class Loginscreen extends StatefulWidget {
-  const Loginscreen({super.key});
+class Signup extends StatefulWidget {
+  const Signup({super.key});
 
   @override
-  State<Loginscreen> createState() => _LoginscreenState();
+  State<Signup> createState() => _SignupState();
 }
-class _LoginscreenState extends State<Loginscreen> {
+
+class _SignupState extends State<Signup> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
   bool passvisibilty = true;
   @override
   Widget build(BuildContext context) {
@@ -42,16 +44,32 @@ class _LoginscreenState extends State<Loginscreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("Welcome Back!", style: TextStyle(color: Colors.black, fontSize: 30, fontWeight: FontWeight.w600),),
+                Text("Create an account!", style: TextStyle(color: Colors.black, fontSize: 30, fontWeight: FontWeight.w600),),
                 SizedBox(height: 10,),
                 Text("Please enter your details", style: TextStyle(fontSize: 15, color: Colors.black38),),
                 SizedBox(height: 20,),
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Name',
+                  ),
+                  controller: nameController,
+                ),
+                SizedBox(height: 10.0,),
                 TextField(
                   decoration: InputDecoration(
                     hintText: "Email",
                     suffixIcon: Icon(Icons.email),
                   ),
                   controller: emailController,
+                ),
+                SizedBox(height: 10.0,),
+                TextField(
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    hintText: "Phone No",
+                    suffixIcon: Icon(Icons.phone),
+                  ),
+                  controller: phoneController,
                 ),
                 SizedBox(height: 10,),
                 TextFormField(
@@ -86,24 +104,22 @@ class _LoginscreenState extends State<Loginscreen> {
                       onPressed: () {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context)=> Testdashboardscreen())
+                          MaterialPageRoute(builder: (context)=> Testdashboardscreen()) 
                           );
-                      }, child: Text("Login")),
+                      }, child: Text("Sign up")),
                 ),
                 SizedBox(height: 7.0,),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Don't have an account?", style: TextStyle(color: Colors.black, fontSize: 15.0, fontWeight: FontWeight.w600),),
+                    Text('Already have an account?', style: TextStyle(color: Colors.black, fontSize: 15.0, fontWeight: FontWeight.w600),),
                     SizedBox(
                       width: 4.0,
                     ),
                 TextButton(
                   onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> Signup()));
+                    Navigator.pop(context);
                   },
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
@@ -111,7 +127,7 @@ class _LoginscreenState extends State<Loginscreen> {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    'Register here',
+                    'Sign in',
                     style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
                   ),),
                   ],
@@ -126,4 +142,5 @@ class _LoginscreenState extends State<Loginscreen> {
       ),
     ),
         );
-  }}
+  }
+}

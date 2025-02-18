@@ -1,5 +1,6 @@
 import 'package:birdify_flutter/screens/loginscreen.dart';
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 
 class Splashscreen extends StatefulWidget {
   const Splashscreen({super.key});
@@ -22,7 +23,7 @@ class _SplashscreenState extends State<Splashscreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: HexColor('#83CBEB'),
       padding: EdgeInsets.all(15.0),
       child: Image.asset('assets/bb3.png')
     );
