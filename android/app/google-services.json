@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1024649940879",
+    "project_id": "birdifyy-f4495",
+    "storage_bucket": "birdifyy-f4495.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1024649940879:android:d52b8ff38b1c611b9d05fa",
+        "android_client_info": {
+          "package_name": "com.example.birdify_flutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALKm_6stUD6GSztxNRd2ra7VgxGEEKYQk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
