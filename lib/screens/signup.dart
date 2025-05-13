@@ -1,86 +1,62 @@
-import 'package:birdify_flutter/screens/signup.dart';
+import 'package:birdify_flutter/screens/testdashboardscreen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:birdify_flutter/screens/testdashboardscreen.dart';
 
-class Loginscreen extends StatefulWidget {
-  const Loginscreen({super.key});
+class Signup extends StatefulWidget {
+  const Signup({super.key});
 
   @override
-  State<Loginscreen> createState() => _LoginscreenState();
+  State<Signup> createState() => _SignupState();
+
 }
 
 
-
-class _LoginscreenState extends State<Loginscreen> {
+class _SignupState extends State<Signup> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController userNameController = TextEditingController();
   bool passvisibilty = true;
 
-  var isLoad = false;
-  final box = GetStorage();
 
-  Future<Map<String, dynamic>?> loginUser({
-    required String emailOrUsername,
-    required String password,
-  }) async {
+  var isLoad = false;
+
+  Future<String?> registerUser() async {
+    // if (password != confirmPassword) return 'Passwords do not match';
     try {
       setState(() {
         isLoad = true;
       });
-      String email = emailOrUsername;
-
-      // Resolve username to email if needed
-      if (!emailOrUsername.contains('@')) {
-        QuerySnapshot snapshot = await FirebaseFirestore.instance
-            .collection('users')
-            .where('username', isEqualTo: emailOrUsername)
-            .limit(1)
-            .get();
-
-        if (snapshot.docs.isEmpty) {
-          return {'error': 'No user found with this username'};
-        }
-
-        email = snapshot.docs.first['email'];
-      }
-
-      // Authenticate with Firebase
       UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+          .createUserWithEmailAndPassword(email: emailController.text, password: passwordController.text);
 
-      String uid = userCredential.user!.uid;
-
-      // Fetch user data from Firestore
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+      // Save additional fields in Firestore
+      await FirebaseFirestore.instance
           .collection('users')
-          .doc(uid)
-          .get();
+          .doc(userCredential.user!.uid)
+          .set({
+        'email': emailController.text.trim(),
+        'name': nameController.text.trim(),
+        'username': userNameController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'uid': userCredential.user!.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
-      if (!userDoc.exists) {
-        return {'error': 'User document does not exist'};
-      }
-
-      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-      userData['uid'] = uid; // Optionally include UID
-
-      print("Login successful, user data: $userData");
-
-      return userData; // Return full user data
-
+      return null; // success
     } on FirebaseAuthException catch (e) {
       setState(() {
         isLoad = false;
       });
-      return {'error': e.message};
+      return e.message;
     } catch (e) {
       setState(() {
         isLoad = false;
       });
-      return {'error': 'An unknown error occurred'};
+      return 'An unknown error occurred';
     }
   }
 
@@ -113,16 +89,39 @@ class _LoginscreenState extends State<Loginscreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("Welcome Back!", style: TextStyle(color: Colors.black, fontSize: 30, fontWeight: FontWeight.w600),),
+                Text("Create an account!", style: TextStyle(color: Colors.black, fontSize: 30, fontWeight: FontWeight.w600),),
                 SizedBox(height: 10,),
                 Text("Please enter your details", style: TextStyle(fontSize: 15, color: Colors.black38),),
                 SizedBox(height: 20,),
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Name',
+                  ),
+                  controller: nameController,
+                ),
+                SizedBox(height: 10.0,),
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Username',
+                  ),
+                  controller: userNameController,
+                ),
+                SizedBox(height: 10.0,),
                 TextField(
                   decoration: InputDecoration(
                     hintText: "Email",
                     suffixIcon: Icon(Icons.email),
                   ),
                   controller: emailController,
+                ),
+                SizedBox(height: 10.0,),
+                TextField(
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    hintText: "Phone No",
+                    suffixIcon: Icon(Icons.phone),
+                  ),
+                  controller: phoneController,
                 ),
                 SizedBox(height: 10,),
                 TextFormField(
@@ -148,8 +147,8 @@ class _LoginscreenState extends State<Loginscreen> {
                 ),
                 SizedBox(height: 10,),
                 isLoad ?
-                    Center(child: CircularProgressIndicator(color: Colors.blue,),)
-                    : SizedBox(
+                Center(child: CircularProgressIndicator(color: Colors.blue,),)
+                    :  SizedBox(
                   width: 1000,
                   height: 50,
                   child: FilledButton(
@@ -157,44 +156,44 @@ class _LoginscreenState extends State<Loginscreen> {
                           backgroundColor: MaterialStateProperty.all<Color>(HexColor('#83CBEB'))
                       ),
                       onPressed: () async {
-                        final response = await loginUser(emailOrUsername: emailController.text, password: passwordController.text);
+                        final error = await registerUser();
 
-                        if (response != null && response['error'] != null) {
+                        if (error != null) {
                           setState(() {
                             isLoad = false;
                           });
-                          print('Login failed: ${response['error']}');
+                          print("Error -> $error");
                         } else {
                           setState(() {
-                            box.write('uid', response?['uid']);
-                            box.write('name', response?['name']);
-                            box.write('email', response?['email']);
                             isLoad = false;
                           });
-                          print("ID -> ${response?['uid']}");
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context)=> Testdashboardscreen())
-                            );
-                          // Access user fields: response['email'], response['username'], etc.
-                        }
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            backgroundColor: Colors.black,
+                            content: Text(
+                              "User Registered Successfully, Please login",
+                              style: TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                            duration: const Duration(seconds: 3),
+                          ));
+                          Navigator.pop(context);
 
-                      }, child: Text("Login")),
+                          print("Registration Successfully");
+                        }
+                      }, child: Text("Sign up")),
                 ),
                 SizedBox(height: 7.0,),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Don't have an account?", style: TextStyle(color: Colors.black, fontSize: 15.0, fontWeight: FontWeight.w600),),
+                    Text('Already have an account?', style: TextStyle(color: Colors.black, fontSize: 15.0, fontWeight: FontWeight.w600),),
                     SizedBox(
                       width: 4.0,
                     ),
                 TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> Signup()));
+                  onPressed: () {
+                    Navigator.pop(context);
                   },
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.zero,
@@ -202,7 +201,7 @@ class _LoginscreenState extends State<Loginscreen> {
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    'Register here',
+                    'Sign in',
                     style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
                   ),),
                   ],
@@ -217,4 +216,5 @@ class _LoginscreenState extends State<Loginscreen> {
       ),
     ),
         );
-  }}
+  }
+}
