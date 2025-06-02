@@ -11,41 +11,69 @@ class Splashscreen extends StatefulWidget {
   State<Splashscreen> createState() => _SplashscreenState();
 }
 
-class _SplashscreenState extends State<Splashscreen> {
-
+class _SplashscreenState extends State<Splashscreen> with SingleTickerProviderStateMixin {
   final box = GetStorage();
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation; 
 
-  changeScreen() {
-    var uid;
-    setState(() {
-       uid  = box.read('uid');
-    });
+  void changeScreen() {
+    final uid = box.read('uid');
     print("already login $uid");
-    if(uid != null && uid.toString().isNotEmpty) {
-      Future.delayed(const Duration(seconds: 3),(){
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const Testdashboardscreen(),), (route) => false);
-      });
-    }
-    else {
-      Future.delayed(const Duration(seconds: 3),(){
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const Loginscreen(),), (route) => false);
-      });
-    }
 
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => uid != null && uid.toString().isNotEmpty
+              ? const Testdashboardscreen()
+              : const Loginscreen(),
+        ),
+        (route) => false,
+      );
+    });
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.1)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+
+    _controller.forward();
     changeScreen();
   }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: HexColor('#83CBEB'),
-      padding: EdgeInsets.all(15.0),
-      child: Image.asset('assets/bb3.png')
+    return Scaffold(
+      backgroundColor: HexColor('#83CBEB'),
+      body: Center(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Image.asset('assets/bb3.png'),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

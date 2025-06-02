@@ -8,21 +8,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 import 'loginscreen.dart';
 
-// void main() {
-//   runApp(BirdifyApp());
-// }
-
-// class BirdifyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       theme: ThemeData.dark(),
-//       home: Testdashboardscreen(),
-//     );
-//   }
-// }
-
 class Testdashboardscreen extends StatefulWidget {
   const Testdashboardscreen({super.key});
 
@@ -31,34 +16,34 @@ class Testdashboardscreen extends StatefulWidget {
 }
 
 class _TestdashboardscreenState extends State<Testdashboardscreen> {
-
   final box = GetStorage();
   var name;
   var email;
 
   logoutUser() {
     box.erase();
-    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const Loginscreen(),), (route) => false);
-
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const Loginscreen()),
+      (route) => false,
+    );
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    setState(() {
-      name = box.read('name');
-      email = box.read('email');
-    });
+    name = box.read('name');
+    email = box.read('email');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text('DASHBOARD'),
+        title: Text('Birdify Dashboard'),
         centerTitle: true,
-        // leading: IconButton(icon: Icon(LucideIcons.menu), onPressed: () {}),
+        backgroundColor: Colors.teal,
         actions: [
           IconButton(icon: Icon(LucideIcons.bell), onPressed: () {}),
         ],
@@ -66,97 +51,58 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
       drawer: Drawer(
         child: ListView(
           children: [
-            // DrawerHeader(
-            //   padding: EdgeInsets.symmetric(vertical: 10.0),
-            //   margin: EdgeInsets.symmetric(vertical: 10.0),
-            //   child: Column(
-            //   crossAxisAlignment: CrossAxisAlignment.start,
-            //   children: [
-            //     SizedBox(height: 10.0,),
-            //     CircleAvatar(
-            //       radius: 30.0,
-            //       // backgroundImage: AssetImage('assetName'),
-            //     ),
-            //     SizedBox(height: 10.0,),
-            //     Text('Uzair Ahmed'),
-            //     Text('uzairahmed289@gmail.com'),
-            //   ],
-            // )),
-            Container(
-              color: Colors.blue,
-              padding: EdgeInsets.only(left: 17.0, top: 10.0, bottom: 10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 30.0,),
-                  CircleAvatar(
-                    radius: 30.0,
-                    backgroundImage: AssetImage('assets/dummy.png'),
-                  ),
-                  SizedBox(height: 10.0,),
-                  Text(name ?? "", style: TextStyle(color: Colors.white,),),
-                  Text(email ?? "", style: TextStyle(color: Colors.white),),
-                ],
+            UserAccountsDrawerHeader(
+              decoration: BoxDecoration(color: Colors.teal),
+              accountName: Text(name ?? ""),
+              accountEmail: Text(email ?? ""),
+              currentAccountPicture: CircleAvatar(
+                backgroundImage: AssetImage('assets/dummy.png'),
               ),
             ),
-            Divider(
-              color: Colors.white70,
-            ),
             ListTile(
-              title: Text('Profile'),
               leading: Icon(Icons.person),
-              onTap: () => {
-                Navigator.pop(context),
-                Navigator.push(context, MaterialPageRoute(builder: (context)=> ProfilePage()))
-              },
+              title: Text('Profile'),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage())),
             ),
             ListTile(
-              title: Text('Settings'),
               leading: Icon(Icons.settings),
-              onTap: () => {
-                Navigator.pop(context),
-              },
+              title: Text('Settings'),
+              onTap: () => {},
             ),
             ListTile(
-              title: Text('Logout'),
               leading: Icon(Icons.logout),
-              onTap: () => {
-                logoutUser()
-              },
+              title: Text('Logout'),
+              onTap: logoutUser,
             ),
           ],
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          spacing: 60.0,
+        child: GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
           children: [
-            // TextField(
-            //   decoration: InputDecoration(
-            //     hintText: 'Search',
-            //     prefixIcon: Icon(LucideIcons.search),
-            //     suffixIcon: Icon(LucideIcons.filter),
-            //     border: OutlineInputBorder(
-            //       borderRadius: BorderRadius.circular(12),
-            //     ),
-            //     filled: true,
-            //     fillColor: Colors.grey[900],
-            //   ),
-            // ),
-            _buildDashboardButton(LucideIcons.shoppingCart, 'Bird Marketplace', context),
-            _buildDashboardButton(LucideIcons.camera, 'Identify a Bird (AI Recognition)', context),
-            _buildDashboardButton(LucideIcons.folder, 'My Listings', context, onTap:(){
-             Navigator.push(
-              context,
-               MaterialPageRoute(builder: (context)=> MyListing())
-               );
+            _buildDashboardCard(LucideIcons.shoppingCart, 'Marketplace', () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => Marketplace()));
+            }),
+            _buildDashboardCard(LucideIcons.camera, 'Identify a Bird', () {
+              // Navigate to AI Recognition
+            }),
+            _buildDashboardCard(LucideIcons.folder, 'My Listings', () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => MyListing()));
+            }),
+            _buildDashboardCard(LucideIcons.plusCircle, 'Add Listing', () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => NewListing()));
             }),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>NewListing()));
+        },
         child: Icon(LucideIcons.plus, size: 36),
         shape: CircleBorder(),
       ),
@@ -164,7 +110,7 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         notchMargin: 8.0,
-        color: Colors.yellow,
+        color: Colors.teal,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -174,43 +120,33 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
             }),
             SizedBox(width: 48),
             IconButton(icon: Icon(LucideIcons.messageSquare), onPressed: () {}),
-            IconButton(icon: Icon(LucideIcons.user), onPressed: () {}),
+            IconButton(icon: Icon(LucideIcons.user), onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfilePage()));
+            }),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDashboardButton(IconData icon, String title, BuildContext context, {VoidCallback? onTap}) {
-
-    double screenHeight = MediaQuery.of(context).size.height;
-    return
-      InkWell(
-        highlightColor: Colors.green,
-        onTap: onTap,
-        // onTap: () {},
-        child:
-        Container(
-          padding: EdgeInsets.all(10.0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.0),
-            color: Colors.lightBlue,
-          ),
-          // alignment: Alignment.center,
-          height: screenHeight*0.1,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
+  Widget _buildDashboardCard(IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        elevation: 5,
+        color: Colors.white,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 30, color: Colors.white),
-              SizedBox(width: 10),
-              Text(title, style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
+              Icon(icon, size: 40, color: Colors.teal),
+              SizedBox(height: 10),
+              Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
         ),
-      );
+      ),
+    );
   }
 }
-

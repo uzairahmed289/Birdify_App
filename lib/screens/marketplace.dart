@@ -22,7 +22,15 @@ class Marketplace extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No listings found.'));
+            return Center(
+              child: Text(
+                'No listings were found!',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                  ),
+                ),
+             );
           }
 
           final listings = snapshot.data!.docs;

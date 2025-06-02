@@ -32,7 +32,7 @@ class _SignupState extends State<Signup> {
       });
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: emailController.text, password: passwordController.text);
-
+          
       // Save additional fields in Firestore
       await FirebaseFirestore.instance
           .collection('users')
