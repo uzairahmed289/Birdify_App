@@ -1,3 +1,7 @@
+import 'package:birdify_flutter/screens/addnewlisting.dart';
+import 'package:birdify_flutter/screens/marketplace.dart';
+import 'package:birdify_flutter/screens/mylisting.dart';
+import 'package:birdify_flutter/screens/profilepage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -103,6 +107,7 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
               leading: Icon(Icons.person),
               onTap: () => {
                 Navigator.pop(context),
+                Navigator.push(context, MaterialPageRoute(builder: (context)=> ProfilePage()))
               },
             ),
             ListTile(
@@ -111,7 +116,6 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
               onTap: () => {
                 Navigator.pop(context),
               },
-
             ),
             ListTile(
               title: Text('Logout'),
@@ -142,7 +146,12 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
             // ),
             _buildDashboardButton(LucideIcons.shoppingCart, 'Bird Marketplace', context),
             _buildDashboardButton(LucideIcons.camera, 'Identify a Bird (AI Recognition)', context),
-            _buildDashboardButton(LucideIcons.folder, 'My Listings', context),
+            _buildDashboardButton(LucideIcons.folder, 'My Listings', context, onTap:(){
+             Navigator.push(
+              context,
+               MaterialPageRoute(builder: (context)=> MyListing())
+               );
+            }),
           ],
         ),
       ),
@@ -155,12 +164,14 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
       bottomNavigationBar: BottomAppBar(
         shape: CircularNotchedRectangle(),
         notchMargin: 8.0,
-        color: Colors.black,
+        color: Colors.yellow,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(icon: Icon(LucideIcons.home), onPressed: () {}),
-            IconButton(icon: Icon(LucideIcons.heart), onPressed: () {}),
+            IconButton(icon: Icon(LucideIcons.home), onPressed: () { }),
+            IconButton(icon: Icon(LucideIcons.store), onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context)=> Marketplace()));
+            }),
             SizedBox(width: 48),
             IconButton(icon: Icon(LucideIcons.messageSquare), onPressed: () {}),
             IconButton(icon: Icon(LucideIcons.user), onPressed: () {}),
@@ -170,13 +181,14 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
     );
   }
 
-  Widget _buildDashboardButton(IconData icon, String title, BuildContext context) {
+  Widget _buildDashboardButton(IconData icon, String title, BuildContext context, {VoidCallback? onTap}) {
 
     double screenHeight = MediaQuery.of(context).size.height;
     return
       InkWell(
         highlightColor: Colors.green,
-        onTap: () {},
+        onTap: onTap,
+        // onTap: () {},
         child:
         Container(
           padding: EdgeInsets.all(10.0),
