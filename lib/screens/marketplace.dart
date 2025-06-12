@@ -1,4 +1,4 @@
-import 'package:birdify_flutter/screens/addnewlisting.dart';
+import 'package:birdify_flutter/screens/addbirdlisting.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -11,12 +11,12 @@ class Marketplace extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Birdify Marketplace')),
       body: StreamBuilder<QuerySnapshot>(
-  stream: FirebaseFirestore.instance
-.collection('listings')
-.where('uid', isNotEqualTo: currentUser?.uid)
-.orderBy('uid')            // order by uid first
-.orderBy('createdAt', descending: true)
-.snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('listings')
+            .where('uid', isNotEqualTo: currentUser?.uid)
+            .orderBy('uid')
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -28,9 +28,9 @@ class Marketplace extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20.0,
-                  ),
                 ),
-             );
+              ),
+            );
           }
 
           final listings = snapshot.data!.docs;
@@ -47,59 +47,67 @@ class Marketplace extends StatelessWidget {
             itemBuilder: (context, index) {
               final data = listings[index].data() as Map<String, dynamic>;
 
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => BirdDetailPage(bird: data)),
+              return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance.collection('users').doc(data['uid']).get(),
+                builder: (context, userSnapshot) {
+                  final sellerName = userSnapshot.hasData
+                      ? (userSnapshot.data!.data() as Map<String, dynamic>)['name'] ?? 'Unknown'
+                      : 'Loading...';
+
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BirdDetailPage(bird: data, sellerName: sellerName),
+                        ),
+                      );
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 4,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                              child: data['imageUrl'] != null && data['imageUrl'].toString().isNotEmpty
+                                  ? Image.network(
+                                      data['imageUrl'],
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          Center(child: Text('Image load error')),
+                                    )
+                                  : Container(
+                                      height: 200,
+                                      color: Colors.grey[300],
+                                      alignment: Alignment.center,
+                                      child: Text('No image available'),
+                                    ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${data['name']} (${data['species'] ?? data['size'] ?? data['type']})',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                if (data['gender'] != null) Text('Gender: ${data['gender']}'),
+                                Text(data['price'], style: TextStyle(color: Colors.green)),
+                                Text('Seller: $sellerName', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 },
-                child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 4,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                          child: data['imageUrl'] != null && data['imageUrl'].toString().isNotEmpty
-                              ? Image.network(
-                                  data['imageUrl'],
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => 
-                                    Center(child: Text('Image load error')),
-                                )
-                              : Container(
-                                  height: 200,
-                                  color: Colors.grey[300],
-                                  alignment: Alignment.center,
-                                  child: Text('No image available'),
-                                ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${data['name']} (${data['species']})',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text('Gender: ${data['gender']}'),
-                            Text(data['price'], style: TextStyle(color: Colors.green)),
-                            Text(
-                              'Seller: ${data['sellerName'] ?? data['seller'] ?? 'Unknown'}',
-                              style: TextStyle(fontSize: 12, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               );
             },
           );
@@ -107,7 +115,7 @@ class Marketplace extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => NewListing()));
+          //Navigator.push(context, MaterialPageRoute(builder: (context) => NewListing()));
         },
         child: Icon(Icons.add),
         tooltip: 'Post a Listing',
@@ -118,7 +126,8 @@ class Marketplace extends StatelessWidget {
 
 class BirdDetailPage extends StatelessWidget {
   final Map<String, dynamic> bird;
-  BirdDetailPage({required this.bird});
+  final String sellerName;
+  BirdDetailPage({required this.bird, required this.sellerName});
 
   @override
   Widget build(BuildContext context) {
@@ -134,13 +143,12 @@ class BirdDetailPage extends StatelessWidget {
                     width: double.infinity,
                     height: 250,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Container(
-                          height: 250,
-                          color: Colors.grey[300],
-                          alignment: Alignment.center,
-                          child: Text('Image load error'),
-                        ),
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 250,
+                      color: Colors.grey[300],
+                      alignment: Alignment.center,
+                      child: Text('Image load error'),
+                    ),
                   )
                 : Container(
                     height: 250,
@@ -153,11 +161,15 @@ class BirdDetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${bird['species']} • ${bird['gender']}', style: TextStyle(fontSize: 18)),
+                  Text('${bird['species'] ?? bird['size'] ?? bird['type']} • ${bird['gender'] ?? ''}',
+                      style: TextStyle(fontSize: 18)),
                   SizedBox(height: 8),
                   Text('Price: ${bird['price']}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   SizedBox(height: 16),
-                  Text('Seller: ${bird['sellerName'] ?? bird['seller'] ?? 'Unknown'}'),
+                  Text('Seller: $sellerName'),
+                  SizedBox(height: 16),
+                  if (bird['description'] != null && bird['description'].toString().isNotEmpty)
+                    Text('Description:\n${bird['description']}'),
                   SizedBox(height: 16),
                   ElevatedButton.icon(
                     onPressed: () {

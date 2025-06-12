@@ -1,4 +1,6 @@
-import 'package:birdify_flutter/screens/addnewlisting.dart';
+import 'package:birdify_flutter/screens/addbirdlisting.dart';
+import 'package:birdify_flutter/screens/addcagelisting.dart';
+import 'package:birdify_flutter/screens/addfeedlisting.dart';
 import 'package:birdify_flutter/screens/marketplace.dart';
 import 'package:birdify_flutter/screens/mylisting.dart';
 import 'package:birdify_flutter/screens/profilepage.dart';
@@ -94,15 +96,57 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
               Navigator.push(context, MaterialPageRoute(builder: (_) => MyListing()));
             }),
             _buildDashboardCard(LucideIcons.plusCircle, 'Add Listing', () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => NewListing()));
+              //Navigator.push(context, MaterialPageRoute(builder: (_) => NewListing()));
             }),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>NewListing()));
-        },
+  showModalBottomSheet(
+    context: context,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: Icon(LucideIcons.bird),
+            title: Text('Add Bird Listing'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => NewBirdListing()));
+            },
+          ),
+          ListTile(
+            leading: Icon(LucideIcons.package),
+            title: Text('Add Cage Listing'),
+            onTap: () {
+              Navigator.pop(context);
+              // Navigate to CageListing() page
+              // Example:
+               Navigator.push(context, MaterialPageRoute(builder: (_) => NewCageListing()));
+            },
+          ),
+          ListTile(
+            leading: Icon(LucideIcons.utensils),
+            title: Text('Add Feed Listing'),
+            onTap: () {
+              Navigator.pop(context);
+              // Navigate to FeedListing() page
+              // Example:
+              Navigator.push(context, MaterialPageRoute(builder: (_) => NewFeedListing()));
+            },
+          ),
+        ],
+      ),
+    ),
+  );
+},
+
         child: Icon(LucideIcons.plus, size: 36),
         shape: CircleBorder(),
       ),

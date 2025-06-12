@@ -25,17 +25,17 @@ Future<String?> uploadImageToImgbb(File imageFile) async {
   }
 }
 
-class NewListing extends StatefulWidget {
+class NewCageListing extends StatefulWidget {
   @override
-  _NewListingState createState() => _NewListingState();
+  _NewCageListingState createState() => _NewCageListingState();
 }
 
-class _NewListingState extends State<NewListing> {
+class _NewCageListingState extends State<NewCageListing> {
   final _formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
-  final speciesController = TextEditingController();
+  final titleController = TextEditingController();
+  final sizeController = TextEditingController();
   final priceController = TextEditingController();
-  String? selectedGender;
+  final descriptionController = TextEditingController();
   File? _pickedImage;
 
   Future<void> pickImage() async {
@@ -69,23 +69,24 @@ class _NewListingState extends State<NewListing> {
     }
 
     await FirebaseFirestore.instance.collection('listings').add({
-      'name': nameController.text.trim(),
-      'species': speciesController.text.trim(),
+      'title': titleController.text.trim(),
+      'size': sizeController.text.trim(),
       'price': priceController.text.trim(),
-      'gender': selectedGender,
+      'description': descriptionController.text.trim(),
+      'type': 'cage',
       'uid': user.uid,
       'imageUrl': imageUrl,
       'createdAt': Timestamp.now(),
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Listing added!')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cage listing added!')));
     Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Post a New Listing')),
+      appBar: AppBar(title: Text('Post a Cage Listing')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -108,29 +109,26 @@ class _NewListingState extends State<NewListing> {
               ),
               SizedBox(height: 16),
               TextFormField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: 'Bird Name'),
+                controller: titleController,
+                decoration: InputDecoration(labelText: 'Cage Title'),
                 validator: (value) => value!.isEmpty ? 'Required' : null,
               ),
               TextFormField(
-                controller: speciesController,
-                decoration: InputDecoration(labelText: 'Species'),
+                controller: sizeController,
+                decoration: InputDecoration(labelText: 'Size / Dimensions'),
                 validator: (value) => value!.isEmpty ? 'Required' : null,
               ),
+              TextFormField(
+  controller: descriptionController,
+  decoration: InputDecoration(labelText: 'Description'),
+  maxLines: 3,
+  validator: (value) => value!.isEmpty ? 'Required' : null,
+),
               TextFormField(
                 controller: priceController,
                 decoration: InputDecoration(labelText: 'Price'),
                 keyboardType: TextInputType.number,
                 validator: (value) => value!.isEmpty ? 'Required' : null,
-              ),
-              DropdownButtonFormField<String>(
-                value: selectedGender,
-                decoration: InputDecoration(labelText: 'Gender'),
-                items: ['Male', 'Female'].map((gender) {
-                  return DropdownMenuItem(value: gender, child: Text(gender));
-                }).toList(),
-                onChanged: (value) => setState(() => selectedGender = value),
-                validator: (value) => value == null ? 'Please select gender' : null,
               ),
               SizedBox(height: 20),
               ElevatedButton(

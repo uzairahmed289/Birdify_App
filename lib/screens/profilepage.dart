@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:birdify_flutter/screens/mylisting.dart';
 import 'package:birdify_flutter/screens/loginscreen.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:birdify_flutter/screens/changepassword.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -61,7 +62,8 @@ class ProfilePage extends StatelessWidget {
                   leading: const Icon(Icons.lock),
                   title: const Text('Change Password'),
                   onTap: () {
-                    // TODO: Navigate to change password screen
+                    Navigator.push(context,
+                     MaterialPageRoute(builder: (_)=> ChangePasswordScreen()));
                   },
                 ),
                 ListTile(
