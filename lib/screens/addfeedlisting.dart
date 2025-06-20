@@ -68,7 +68,11 @@ class _NewFeedListingState extends State<NewFeedListing> {
       return;
     }
 
-    await FirebaseFirestore.instance.collection('listings').add({
+    await FirebaseFirestore.instance
+        .collection('listings')
+        .doc('feed')
+        .collection('listings')
+        .add({
       'title': titleController.text.trim(),
       'weight': weightController.text.trim(),
       'price': priceController.text.trim(),

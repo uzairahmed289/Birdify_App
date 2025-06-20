@@ -68,7 +68,11 @@ class _NewCageListingState extends State<NewCageListing> {
       return;
     }
 
-    await FirebaseFirestore.instance.collection('listings').add({
+    await FirebaseFirestore.instance
+        .collection('listings')
+        .doc('cages')
+        .collection('listings')
+        .add({
       'title': titleController.text.trim(),
       'size': sizeController.text.trim(),
       'price': priceController.text.trim(),
@@ -119,11 +123,11 @@ class _NewCageListingState extends State<NewCageListing> {
                 validator: (value) => value!.isEmpty ? 'Required' : null,
               ),
               TextFormField(
-  controller: descriptionController,
-  decoration: InputDecoration(labelText: 'Description'),
-  maxLines: 3,
-  validator: (value) => value!.isEmpty ? 'Required' : null,
-),
+                controller: descriptionController,
+                decoration: InputDecoration(labelText: 'Description'),
+                maxLines: 3,
+                validator: (value) => value!.isEmpty ? 'Required' : null,
+              ),
               TextFormField(
                 controller: priceController,
                 decoration: InputDecoration(labelText: 'Price'),

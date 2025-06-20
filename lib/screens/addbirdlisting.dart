@@ -1,3 +1,7 @@
+// These are the screens for posting bird, feed, and cage listings in a subcollection structure
+// e.g., listings/bird, listings/feed, listings/cages.
+// Ensure that user data exists in `users/{uid}` with a `name` field for seller display.
+
 import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -32,7 +36,7 @@ class NewBirdListing extends StatefulWidget {
 
 class _NewBirdListingState extends State<NewBirdListing> {
   final _formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
+  final titleController = TextEditingController();
   final speciesController = TextEditingController();
   final priceController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -69,14 +73,19 @@ class _NewBirdListingState extends State<NewBirdListing> {
       return;
     }
 
-    await FirebaseFirestore.instance.collection('listings').add({
-      'name': nameController.text.trim(),
+    await FirebaseFirestore.instance
+        .collection('listings')
+        .doc('bird')
+        .collection('listings')
+        .add({
+      'title': titleController.text.trim(),
       'species': speciesController.text.trim(),
       'price': priceController.text.trim(),
       'description': descriptionController.text.trim(),
       'gender': selectedGender,
       'uid': user.uid,
       'imageUrl': imageUrl,
+      'type': 'bird',
       'createdAt': Timestamp.now(),
     });
 
@@ -110,7 +119,7 @@ class _NewBirdListingState extends State<NewBirdListing> {
               ),
               SizedBox(height: 16),
               TextFormField(
-                controller: nameController,
+                controller: titleController,
                 decoration: InputDecoration(labelText: 'Bird Name'),
                 validator: (value) => value!.isEmpty ? 'Required' : null,
               ),
@@ -120,12 +129,11 @@ class _NewBirdListingState extends State<NewBirdListing> {
                 validator: (value) => value!.isEmpty ? 'Required' : null,
               ),
               TextFormField(
-  controller: descriptionController,
-  decoration: InputDecoration(labelText: 'Description'),
-  maxLines: 3,
-  validator: (value) => value!.isEmpty ? 'Required' : null,
-),
-
+                controller: descriptionController,
+                decoration: InputDecoration(labelText: 'Description'),
+                maxLines: 3,
+                validator: (value) => value!.isEmpty ? 'Required' : null,
+              ),
               TextFormField(
                 controller: priceController,
                 decoration: InputDecoration(labelText: 'Price'),
