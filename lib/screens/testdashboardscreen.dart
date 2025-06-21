@@ -1,6 +1,7 @@
 import 'package:birdify_flutter/screens/addbirdlisting.dart';
 import 'package:birdify_flutter/screens/addcagelisting.dart';
 import 'package:birdify_flutter/screens/addfeedlisting.dart';
+import 'package:birdify_flutter/screens/identification.dart';
 import 'package:birdify_flutter/screens/marketplace.dart';
 import 'package:birdify_flutter/screens/mylisting.dart';
 import 'package:birdify_flutter/screens/profilepage.dart';
@@ -90,7 +91,7 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
               Navigator.push(context, MaterialPageRoute(builder: (_) => Marketplace()));
             }),
             _buildDashboardCard(LucideIcons.camera, 'Identify a Bird', () {
-              // Navigate to AI Recognition
+              Navigator.push(context, MaterialPageRoute(builder: (_) => IdentificationPage()));
             }),
             _buildDashboardCard(LucideIcons.folder, 'My Listings', () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => MyListing()));
