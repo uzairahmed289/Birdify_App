@@ -8,7 +8,8 @@ import 'package:birdify_flutter/screens/profilepage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'loginscreen.dart';
 
 class Testdashboardscreen extends StatefulWidget {
@@ -20,8 +21,11 @@ class Testdashboardscreen extends StatefulWidget {
 
 class _TestdashboardscreenState extends State<Testdashboardscreen> {
   final box = GetStorage();
+  final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+  
   var name;
   var email;
+  var profileImage;
 
   logoutUser() {
     box.erase();
@@ -32,12 +36,30 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    name = box.read('name');
-    email = box.read('email');
+ @override
+void initState() {
+  super.initState();
+  name = box.read('name');
+  email = box.read('email');
+
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid != null) {
+    FirebaseFirestore.instance.collection('users').doc(uid).get().then((doc) {
+      if (doc.exists) {
+        final data = doc.data();
+        setState(() {
+          profileImage = data != null && data.containsKey('profileImage')
+              ? data['profileImage']
+              : null;
+        });
+      }
+    }).catchError((e) {
+      // Optional: log error if needed
+      //print("Error loading profile image: $e");
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -52,25 +74,58 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
         ],
       ),
       drawer: Drawer(
+  child: Column(
+    children: [
+      StreamBuilder<DocumentSnapshot>(
+  stream: FirebaseFirestore.instance
+      .collection('users')
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .snapshots(),
+  builder: (context, snapshot) {
+    if (!snapshot.hasData) {
+      return const UserAccountsDrawerHeader(
+        accountName: Text(""),
+        accountEmail: Text(""),
+        currentAccountPicture: CircleAvatar(
+          backgroundImage: AssetImage('assets/dummy.png'),
+        ),
+        decoration: BoxDecoration(color: Colors.teal),
+      );
+    }
+
+    final data = snapshot.data!.data() as Map<String, dynamic>;
+    final name = data['name'] ?? "";
+    final email = data['email'] ?? "";
+    final imageUrl = data['profileImage'];
+
+    return UserAccountsDrawerHeader(
+      decoration: const BoxDecoration(color: Colors.teal),
+      accountName: Text(name),
+      accountEmail: Text(email),
+      currentAccountPicture: CircleAvatar(
+        backgroundImage: imageUrl != null
+            ? NetworkImage(imageUrl)
+            : const AssetImage('assets/dummy.png') as ImageProvider,
+      ),
+    );
+  },
+),
+
+      Expanded(
         child: ListView(
           children: [
-            UserAccountsDrawerHeader(
-              decoration: BoxDecoration(color: Colors.teal),
-              accountName: Text(name ?? ""),
-              accountEmail: Text(email ?? ""),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: AssetImage('assets/dummy.png'),
-              ),
-            ),
             ListTile(
               leading: Icon(Icons.person),
               title: Text('Profile'),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfilePage()),
+              ),
             ),
             ListTile(
               leading: Icon(Icons.settings),
               title: Text('Settings'),
-              onTap: () => {},
+              onTap: () {},
             ),
             ListTile(
               leading: Icon(Icons.logout),
@@ -80,6 +135,33 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
           ],
         ),
       ),
+      Divider(),
+      Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text('Dark Mode'),
+      ValueListenableBuilder<ThemeMode>(
+        valueListenable: themeNotifier,
+        builder: (context, mode, _) {
+          return Switch(
+            value: mode == ThemeMode.dark,
+            onChanged: (val) {
+              themeNotifier.value = val ? ThemeMode.dark : ThemeMode.light;
+              GetStorage().write('isDarkMode', val); // Save user preference
+            },
+          );
+        },
+      ),
+    ],
+  ),
+)
+
+    ],
+  ),
+),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.count(
