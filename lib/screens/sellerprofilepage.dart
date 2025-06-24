@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'package:birdify_flutter/screens/marketplace.dart'; // Make sure to import your BirdDetailPage file
+import 'package:birdify_flutter/screens/marketplace.dart';
+
+import 'bird_detail_page.dart'; // Make sure to import your BirdDetailPage file
 
 class SellerProfilePage extends StatelessWidget {
   final String sellerUid;

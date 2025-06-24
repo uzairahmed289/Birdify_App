@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:birdify_flutter/screens/marketplace.dart';
 import 'package:birdify_flutter/screens/editlistingpage.dart';
 
+import 'bird_detail_page.dart';
+
 
 class MyListing extends StatelessWidget {
   @override

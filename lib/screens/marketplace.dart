@@ -1,11 +1,14 @@
 import 'package:birdify_flutter/screens/addbirdlisting.dart';
 import 'package:birdify_flutter/screens/addcagelisting.dart';
 import 'package:birdify_flutter/screens/addfeedlisting.dart';
+import 'package:birdify_flutter/screens/chatpage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:birdify_flutter/screens/sellerprofilepage.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+
+import 'bird_detail_page.dart';
 
 class Marketplace extends StatefulWidget {
   @override
@@ -13,10 +16,15 @@ class Marketplace extends StatefulWidget {
 }
 
 class _MarketplaceState extends State<Marketplace> {
+
+
   final currentUser = FirebaseAuth.instance.currentUser;
   String _selectedFilter = 'all';
   String _searchQuery = '';
 final TextEditingController _searchController = TextEditingController();
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -283,98 +291,6 @@ final TextEditingController _searchController = TextEditingController();
         foregroundColor: isSelected ? Colors.white : Colors.black,
       ),
       child: Text(label),
-    );
-  }
-}
-
-class BirdDetailPage extends StatelessWidget {
-  final Map<String, dynamic> bird;
-  final String sellerName;
-
-  BirdDetailPage({required this.bird, required this.sellerName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(bird['name'] ?? bird['title'] ?? 'Listing Detail')),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            bird['imageUrl'] != null && bird['imageUrl'].toString().isNotEmpty
-                ? Image.network(
-                    bird['imageUrl'],
-                    width: double.infinity,
-                    height: 250,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      height: 250,
-                      color: Colors.grey[300],
-                      alignment: Alignment.center,
-                      child: Text('Image load error'),
-                    ),
-                  )
-                : Container(
-                    height: 250,
-                    color: Colors.grey[300],
-                    alignment: Alignment.center,
-                    child: Text('No image available'),
-                  ),
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-  '${bird['title'] ?? bird['name'] ?? bird['species'] ?? bird['size'] ?? bird['type'] ?? ''}'
-  '${bird['gender'] != null ? " • ${bird['gender']}" : ""}',
-  style: TextStyle(fontSize: 18),
-),
-                  SizedBox(height: 8),
-                  Text(
-                    'Price: ${bird['price']}',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16),
-                  Text('Seller: $sellerName'),
-                  SizedBox(height: 16),
-                  if (bird['description'] != null && bird['description'].toString().isNotEmpty)
-                    Text('Description:\n${bird['description']}'),
-                  SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            // TODO: Add contact seller logic
-                          },
-                          icon: Icon(Icons.message),
-                          label: Text('Contact Seller'),
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => SellerProfilePage(sellerUid: bird['uid']),
-                              ),
-                            );
-                          },
-                          icon: Icon(Icons.person),
-                          label: Text('Seller Profile'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
