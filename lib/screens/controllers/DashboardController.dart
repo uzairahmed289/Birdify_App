@@ -20,9 +20,7 @@ class DashboardController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     super.onInit();
-    isDark = box.read("isDarkMode");
+    isDark = box.read("isDarkMode") ?? false;
     update();
   }
-
-
 }

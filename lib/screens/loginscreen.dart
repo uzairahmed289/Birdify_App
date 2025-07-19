@@ -12,15 +12,13 @@ class Loginscreen extends StatefulWidget {
   @override
   State<Loginscreen> createState() => _LoginscreenState();
 }
-
-
-
 class _LoginscreenState extends State<Loginscreen> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   bool passvisibilty = true;
 
   var isLoad = false;
+  String? errorMessage;
   final box = GetStorage();
 
   Future<Map<String, dynamic>?> loginUser({
@@ -51,7 +49,6 @@ class _LoginscreenState extends State<Loginscreen> {
       // Authenticate with Firebase
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
-
       String uid = userCredential.user!.uid;
 
       // Fetch user data from Firestore
@@ -158,7 +155,7 @@ class _LoginscreenState extends State<Loginscreen> {
                       ),
                       onPressed: () async {
                         final response = await loginUser(emailOrUsername: emailController.text, password: passwordController.text);
-
+                        
                         if (response != null && response['error'] != null) {
                           setState(() {
                             isLoad = false;
@@ -215,6 +212,6 @@ class _LoginscreenState extends State<Loginscreen> {
           ],
         )
       ),
-    ),
+    ), 
         );
   }}

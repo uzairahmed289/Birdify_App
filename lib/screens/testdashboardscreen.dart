@@ -8,6 +8,7 @@ import 'package:birdify_flutter/screens/inbox.dart';
 import 'package:birdify_flutter/screens/marketplace.dart';
 import 'package:birdify_flutter/screens/mylisting.dart';
 import 'package:birdify_flutter/screens/profilepage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -27,6 +28,7 @@ class Testdashboardscreen extends StatefulWidget {
 class _TestdashboardscreenState extends State<Testdashboardscreen> {
   final box = GetStorage();
   final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+  
 
   var name;
   var email;
@@ -44,8 +46,11 @@ class _TestdashboardscreenState extends State<Testdashboardscreen> {
  @override
 void initState() {
   super.initState();
+  saveTokenToFirestore();
   name = box.read('name');
   email = box.read('email');
+
+
 
   final uid = FirebaseAuth.instance.currentUser?.uid;
   if (uid != null) {
@@ -64,6 +69,19 @@ void initState() {
     });
   }
 }
+
+void saveTokenToFirestore() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final token = await FirebaseMessaging.instance.getToken();
+    if (token != null) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+        'fcmToken': token,
+      });
+      print("📱 FCM Token saved: $token");
+    }
+  }
 
 
   @override

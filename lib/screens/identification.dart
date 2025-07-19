@@ -6,13 +6,15 @@ import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 import 'package:mime/mime.dart';
 import 'package:image/image.dart' as img;
+import 'package:flutter_animate/flutter_animate.dart';
 
 class IdentificationPage extends StatefulWidget {
   @override
   _IdentificationPageState createState() => _IdentificationPageState();
 }
 
-class _IdentificationPageState extends State<IdentificationPage> {
+class _IdentificationPageState extends State<IdentificationPage>
+    with TickerProviderStateMixin {
   File? _image;
   String? _species;
   String? _gender;
@@ -21,39 +23,38 @@ class _IdentificationPageState extends State<IdentificationPage> {
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage() async {
-  final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
 
-  if (pickedFile != null) {
-    File resizedImage = await _resizeImage(File(pickedFile.path));
-    
-    setState(() {
-      _image = resizedImage;
-      _species = null;
-      _gender = null;
-    });
+    if (pickedFile != null) {
+      File resizedImage = await _resizeImage(File(pickedFile.path));
 
-    _uploadImage(_image!);
+      setState(() {
+        _image = resizedImage;
+        _species = null;
+        _gender = null;
+      });
+
+      _uploadImage(_image!);
+    }
   }
-}
 
-Future<File> _resizeImage(File originalImage) async {
-  final rawBytes = await originalImage.readAsBytes();
-  final image = img.decodeImage(rawBytes);
+  Future<File> _resizeImage(File originalImage) async {
+    final rawBytes = await originalImage.readAsBytes();
+    final image = img.decodeImage(rawBytes);
 
-  if (image == null) throw Exception("Failed to decode image");
+    if (image == null) throw Exception("Failed to decode image");
 
-  // Resize image directly to 224x224 without modifying background
-  final resized = img.copyResize(image, width: 224, height: 224);
+    final resized = img.copyResize(image, width: 224, height: 224);
 
-  // Save to temp file
-  final tempDir = Directory.systemTemp;
-  final resizedPath = '${tempDir.path}/resized_${DateTime.now().millisecondsSinceEpoch}.jpg';
-  final resizedFile = File(resizedPath)
-    ..writeAsBytesSync(img.encodeJpg(resized));
+    final tempDir = Directory.systemTemp;
+    final resizedPath =
+        '${tempDir.path}/resized_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final resizedFile =
+        File(resizedPath)..writeAsBytesSync(img.encodeJpg(resized));
 
-  return resizedFile;
-}
-
+    return resizedFile;
+  }
 
   Future<void> _uploadImage(File imageFile) async {
     setState(() {
@@ -61,7 +62,8 @@ Future<File> _resizeImage(File originalImage) async {
     });
 
     final mimeTypeData = lookupMimeType(imageFile.path)?.split('/');
-    final request = http.MultipartRequest('POST', Uri.parse('http://192.168.0.109:8000/predict/'));
+    final request = http.MultipartRequest(
+        'POST', Uri.parse('http://192.168.0.109:8000/predict/'));
     request.files.add(await http.MultipartFile.fromPath(
       'file',
       imageFile.path,
@@ -94,26 +96,47 @@ Future<File> _resizeImage(File originalImage) async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Bird Identification')),
+      appBar: AppBar(title: const Text('Bird Identification')),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             _image != null
                 ? Image.file(_image!, height: 200)
-                : Container(height: 200, color: Colors.grey[300], child: Center(child: Text('No image selected'))),
-            SizedBox(height: 20),
+                    .animate()
+                    .fadeIn(duration: 500.ms)
+                    .scale(duration: 500.ms)
+                : Container(
+                    height: 200,
+                    color: Colors.grey[300],
+                    child: const Center(child: Text('No image selected')),
+                  ).animate().fadeIn(),
+            const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: _pickImage,
-              icon: Icon(Icons.image),
-              label: Text('Pick Image'),
-            ),
-            SizedBox(height: 20),
+              icon: const Icon(Icons.image),
+              label: const Text('Pick Image'),
+            )
+                .animate()
+                .fadeIn(duration: 500.ms)
+                .slideY(begin: 0.5, duration: 500.ms)
+                .scale(),
+            const SizedBox(height: 20),
             if (_isLoading)
-              CircularProgressIndicator()
+              const CircularProgressIndicator().animate().fadeIn().scale()
             else ...[
-              if (_species != null) Text('Species: $_species', style: TextStyle(fontSize: 18)),
-              if (_gender != null) Text('Gender: $_gender', style: TextStyle(fontSize: 18)),
+              if (_species != null)
+                Text('Species: $_species',
+                        style: const TextStyle(fontSize: 18))
+                    .animate()
+                    .fadeIn(duration: 400.ms)
+                    .slideX(begin: -0.5),
+              if (_gender != null)
+                Text('Gender: $_gender',
+                        style: const TextStyle(fontSize: 18))
+                    .animate()
+                    .fadeIn(duration: 400.ms)
+                    .slideX(begin: 0.5),
             ]
           ],
         ),

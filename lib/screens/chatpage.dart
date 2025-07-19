@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:birdify_flutter/screens/push_notification_service.dart';
 
 class ChatPage extends StatefulWidget {
   final String conversationId;
@@ -26,7 +27,6 @@ class _ChatPageState extends State<ChatPage> {
       ),
       body: Column(
         children: [
-          // 🧾 Message List
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -68,8 +68,6 @@ class _ChatPageState extends State<ChatPage> {
               },
             ),
           ),
-
-          // 📨 Input Field
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: Row(
@@ -98,12 +96,13 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> sendMessage() async {
-
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
+
     setState(() {
       _messageController.text = "";
     });
+
     final messageRef = FirebaseFirestore.instance
         .collection('conversations')
         .doc(widget.conversationId)
@@ -116,14 +115,24 @@ class _ChatPageState extends State<ChatPage> {
       'timestamp': FieldValue.serverTimestamp(),
     });
 
-    // update last message metadata in conversation doc
-    await FirebaseFirestore.instance
-        .collection('conversations')
-        .doc(widget.conversationId)
-        .update({
+    final convoRef = FirebaseFirestore.instance.collection('conversations').doc(widget.conversationId);
+    final convoSnap = await convoRef.get();
+    final sellerId = convoSnap['sellerId'];
+    final buyerId = convoSnap['buyerId'];
+    final receiverId = (currentUserId == sellerId) ? buyerId : sellerId;
+
+    await convoRef.update({
       'lastMessage': text,
       'timestamp': FieldValue.serverTimestamp(),
     });
+
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(receiverId).get();
+    final receiverToken = userDoc['fcmToken'];
+
+    if (receiverToken != null) {
+      await sendPushNotification(receiverToken, text);
+    }
+
     _scrollToBottom();
   }
 
