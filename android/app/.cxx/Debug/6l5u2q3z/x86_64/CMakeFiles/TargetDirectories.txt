@@ -1,2 +1,0 @@
-D:/Projects/Birdify_App/android/app/.cxx/Debug/6l5u2q3z/x86_64/CMakeFiles/edit_cache.dir
-D:/Projects/Birdify_App/android/app/.cxx/Debug/6l5u2q3z/x86_64/CMakeFiles/rebuild_cache.dir
