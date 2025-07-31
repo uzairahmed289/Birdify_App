@@ -26,9 +26,26 @@ class _IdentificationPageState extends State<IdentificationPage> {
 
   // Inside your State class
 final List<String> _supportedBirds = [
-  'Turkey Bird',
-  'Northern Pin Tail',
-  'Cardinal'
+    'American Redstart',
+    'Koel',
+    'Brewer Bird',
+    'Cardinal',
+    'Eclectus',
+    'Indian Paradise',
+    'Indigo Bunting',
+    'Lesser Paradise',
+    'Northern Pin Tail',
+    'Orchard Oriol',
+    'Ostrich',
+    'Peacock',
+    'Purple Finch',
+    'Purple Martin',
+    'Southern Kohran',
+    'Spectacled Eider',
+    'Turkey Bird',
+    'Western Capercaillie',
+    'Western Parotia',
+    'Wood Duck',
 ];
 
 void _showSupportedBirdsDialog() {

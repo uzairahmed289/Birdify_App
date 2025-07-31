@@ -10,7 +10,8 @@ class ChangePasswordScreen extends StatefulWidget {
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _passwordController = TextEditingController();
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
   bool _isLoading = false;
 
   Future<void> _changePassword() async {
@@ -19,15 +20,23 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await FirebaseAuth.instance.currentUser!
-          .updatePassword(_passwordController.text);
+      final user = FirebaseAuth.instance.currentUser;
+      final email = user?.email;
+      final credential = EmailAuthProvider.credential(
+        email: email!,
+        password: _currentPasswordController.text,
+      );
+
+      await user!.reauthenticateWithCredential(credential);
+      await user.updatePassword(_newPasswordController.text);
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Password updated successfully')),
       );
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Password update failed')),
+        SnackBar(content: Text('Incorrect Current Password')),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -45,7 +54,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           child: Column(
             children: [
               TextFormField(
-                controller: _passwordController,
+                controller: _currentPasswordController,
+                decoration: InputDecoration(labelText: 'Current Password'),
+                obscureText: true,
+                validator: (val) =>
+                    val != null && val.isNotEmpty ? null : 'Required',
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _newPasswordController,
                 decoration: InputDecoration(labelText: 'New Password'),
                 obscureText: true,
                 validator: (val) =>
@@ -58,10 +75,82 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       onPressed: _changePassword,
                       child: Text('Update Password'),
                     ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => ForgotPasswordDialog(),
+                  );
+                },
+                child: Text('Forgot Password'),
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class ForgotPasswordDialog extends StatefulWidget {
+  @override
+  State<ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
+}
+
+class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
+  final TextEditingController _emailController = TextEditingController();
+  String _message = '';
+  bool _loading = false;
+
+  Future<void> sendPasswordReset() async {
+    setState(() => _loading = true);
+    try {
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: _emailController.text.trim());
+      setState(() {
+        _message = "Password reset email sent!";
+      });
+    } catch (e) {
+      setState(() {
+        _message = "Error: ${e.toString()}";
+      });
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text("Reset Password"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _emailController,
+            decoration: InputDecoration(
+              labelText: 'Enter your email',
+            ),
+          ),
+          if (_message.isNotEmpty) ...[
+            SizedBox(height: 10),
+            Text(_message, style: TextStyle(color: Colors.red)),
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: _loading ? null : () => Navigator.pop(context),
+          child: Text("Cancel"),
+        ),
+        ElevatedButton(
+          onPressed: _loading ? null : sendPasswordReset,
+          child: _loading
+              ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              : Text("Send Email"),
+        ),
+      ],
     );
   }
 }

@@ -9,6 +9,7 @@ import 'package:birdify_flutter/screens/marketplace.dart';
 import 'package:birdify_flutter/screens/mylisting.dart';
 import 'package:birdify_flutter/screens/profilepage.dart';
 import 'package:birdify_flutter/screens/settings.dart';
+import 'package:birdify_flutter/screens/webview_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -366,28 +367,30 @@ class BlogSection extends StatelessWidget {
     },
     {
       'title': '🪺 Choosing the Right Cage for Your Pet Bird',
-      'url': 'https://www.petmd.com/bird/care/evr_bd_choosing_the_right_cage'
+      'url': 'https://www.petsmart.com/learning-center/bird-care/birdcage-setup/A0043.html'
     },
     {
       'title': '🥣 What Should You Feed Your Bird?',
-      'url': 'https://www.birdtricks.com/blogs/birdtricks-blog/what-should-you-feed-your-parrot'
+      'url': 'https://kb.rspca.org.au/knowledge-base/what-should-i-feed-my-birds/'
     },
     {
       'title': '🧠 Training Your Bird – A Beginner’s Guide',
-      'url': 'https://www.birdchannel.com/bird-training-101/'
+      'url': 'https://myrightbird.com/articles/5-essential-tips-for-training-your-pet-bird'
     },
     {
       'title': '🦜 How to Keep Your Bird Mentally Stimulated',
-      'url': 'https://lafeber.com/pet-birds/stimulation-for-parrots/'
+      'url': 'https://www.batcopetsitting.com/parrots-mental-health/'
     },
   ];
 
-  Future<void> _openUrl(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      throw 'Could not launch $url';
-    }
-  }
+void _openInWebView(BuildContext context, String title, String url) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => BlogWebViewScreen(title: title, url: url),
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -400,7 +403,7 @@ class BlogSection extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ...blogs.map((blog) => InkWell(
-              onTap: () => _openUrl(blog['url']!),
+              onTap: () => _openInWebView(context, blog['title']!, blog['url']!),
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(
@@ -408,7 +411,6 @@ class BlogSection extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     color: Colors.blue,
-                    decoration: TextDecoration.underline,
                   ),
                 ),
               ),
